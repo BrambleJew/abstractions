@@ -11,7 +11,7 @@ import java.util.Scanner;
 // Тело метода
 @Slf4j
 
-public class Main {
+public class Application {
     public static void main(String[] args) {
         var ops = new ArrayList<Operation>();
         var calculator = new Calculator("Top404");
