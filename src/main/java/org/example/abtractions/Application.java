@@ -2,6 +2,13 @@ package org.example.abtractions;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -13,17 +20,43 @@ import java.util.Scanner;
 
 public class Application {
     public static void main(String[] args) {
+        var filepath = args[0];
         var parser = new BasicExpressionParser();
-        var scanner = new Scanner(System.in);
-        for (; ; ) {
-            log.info("Вводите");
-            var s = scanner.next();
-            if (s.trim().equalsIgnoreCase("exit")) {
-                break;
-            }
-            var expression = parser.parse(s);
-            var result = expression.getResult();
-            log.info("{}",result);
+        String task;
+        try {
+            task = getTask(filepath);
+        } catch (IOException e) {
+            log.error("Не могу прочитать файл с выражением", e);
+            return;
+        }
+        var splitted = parser.split(task);
+        log.info("{}",splitted);
+        var expression = parser.parse(task);
+        var result = expression.getResult();
+        log.info("   ={}", result);
+        try {
+            appendResult(result, filepath);
+        } catch (IOException e) {
+            log.error("Не могу записать результат в файл", e);
+
+        }
+    }
+
+    private static void appendResult(int result, String filepath) throws IOException {
+        try (
+                BufferedWriter bw = new BufferedWriter(new FileWriter(filepath, true));
+        ) {
+            bw.newLine();
+            bw.write(String.valueOf(result));
+        }
+    }
+
+    private static String getTask(String filepath) throws IOException {
+        try (var stream = Files.lines(Path.of(filepath))) {
+            return stream.reduce((first, second) -> second).orElseThrow();
         }
     }
 }
+
+
+
